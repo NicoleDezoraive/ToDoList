@@ -3,10 +3,15 @@ const bodyParser = require('body-parser');
 // const https = require('https');
 // const request = require('request');
 
+
+//modules:
+const date = require(__dirname + "/date.js")
+
 const app = express();
 const port = 3000;
 // var item = "";
-let items = ["Buy Food"];
+const items = ["Buy Food"];
+const workItems = [];
 // require("dotenv").config();
 // //
 app.use(express.static("public"));
@@ -15,64 +20,41 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-
-  let today = new Date();
-  let currentDay = today.getDay();
-  // let day = "";
-  let options = {
-    weekday: 'long',
-    // year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  };
-  let day = today.toLocaleDateString("en-US", options);
-  // switch (currentDay) {
-  //   case 0:
-  //     day = "Sunday";
-  //     break;
-  //   case 1:
-  //     day = "Monday";
-  //     break;
-  //   case 2:
-  //     day = "Tuesday";
-  //     break;
-  //   case 3:
-  //     day = "Wensday";
-  //     break;
-  //   case 4:
-  //     day = "Thursday";
-  //     break;
-  //   case 5:
-  //     day = "Friday";
-  //     break;
-  //   case 6:
-  //     day = "Saturday";
-  //     break;
-  //   default:
-  //   console.log("Error: current day is equal to:" + currentDay);
-  // }
-  // if (currentDay === 6 || currentDay === 5) { //Friday or Saturday
-  //   // res.send("<h1>Yat it's the weekend!</h1>");
-  //   day = "weekend";
-  // } else {
-  //   // res.write("<p>It is not the weekend.<p>");
-  //   // res.write("<h1>Boo! I have to work!<h1>");
-  //   // res.send();
-  //   day = "weekday";
-  //   // res.sendFile(__dirname + "/index.html");
-  // }
-
+  const day = date.getDate();
   res.render('list', {
-    kindOfDay: day,
-    newListItem: items
+    listTitle: day,
+    newListItems: items
   });
-
 })
 
 app.post('/', (req, res) => {
-  let item = req.body.newItem;
-  items.push(item);
-  res.redirect("/");
+  // console.log(req.body);
+  const item = req.body.newItem;
+  if(req.body.list === "Work"){
+    workItems.push(item);
+    res.redirect("/work");
+  }else{
+    items.push(item);
+    res.redirect("/");
+  }
+});
+
+app.get('/work', (req, res) => {
+  res.render('list', {
+    listTitle: "Work List",
+    newListItems: workItems
+  });
+});
+
+app.post('/work', (req, res) => {
+  const item = req.body.newItem;
+  workItems.push(item);
+  res.redirect("/work");
+});
+
+
+app.get('/about', (req, res) => {
+  res.render("about");
 });
 
 app.listen(process.env.PORT || port, () => {
